@@ -6,3 +6,12 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+combine_rust = "0.1.4"
+tokio = { version = "1", features = ["full"] }
+serde_json = "1.0"
+serde="1.0.188"
+
+[features]
+auto_start=[]
+executable_move=[]
+display=[]
