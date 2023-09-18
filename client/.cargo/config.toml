@@ -1,5 +1,6 @@
 [env]
 TEST="Proxtx"
-REMOTE_SERVER="http://localhost:3000/api/"
+REMOTE_SERVER="http://localhost:3007/api/"
 AUTH_KEY="40593845"
 CLIENT_ID="Main PC"
+RUST_BACKTRACE="1"

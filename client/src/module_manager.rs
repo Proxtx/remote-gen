@@ -1,51 +1,74 @@
 use std::collections::HashMap;
 
+use crate::{features, FetchCommand};
+use combine_rust::combine::Combine;
+
+#[async_trait::async_trait]
 pub trait Function {
-    fn function(&self, module: Box<&mut dyn Module>, args: Vec<&str>);
+    async fn function(&self, args: serde_json::Value, api: &Combine);
 }
 
-pub trait Module {
-    fn get_functions(&self) -> HashMap<String, Box<dyn Function>>;
+pub struct Module {
+    functions: HashMap<String, Box<dyn Function>>,
+}
 
-    fn run_function(&mut self, function: String, args: Vec<&str>) {
-        let functions = self.get_functions();
-
-        match functions.get(&function) {
+impl Module {
+    pub async fn run_function(&self, function: String, args: serde_json::Value, api: &Combine) {
+        match self.functions.get(&function) {
             Some(entry) => {
-                entry.function(Box::from(self), args);
+                entry.function(args, api).await;
             }
             None => {
-                print!("Function {} not found.", function)
+                println!("Function {} not found.", function)
             }
+        }
+    }
+
+    pub fn new(functions: HashMap<String, Box<dyn Function>>) -> Module {
+        Module {
+            functions: functions,
         }
     }
 }
 
 pub struct ModuleManager {
-    modules: HashMap<String, Box<dyn Module>>,
+    modules: HashMap<String, Box<Module>>,
 }
 
 impl ModuleManager {
-    pub fn new(modules: HashMap<String, Box<dyn Module>>) -> ModuleManager {
+    pub fn new(modules: HashMap<String, Box<Module>>) -> ModuleManager {
         ModuleManager { modules: modules }
     }
 
-    pub fn run_function(&self, module: String, function: String, args: Vec<&str>) {
-        match self.modules.get_mut(&module) {
+    pub async fn run_function(
+        &self,
+        module: String,
+        function: String,
+        args: serde_json::Value,
+        api: &Combine,
+    ) {
+        match self.modules.get(&module) {
             Some(module) => {
-                module.run_function(function, args);
+                module.run_function(function, args, api).await;
             }
             None => {
-                print!("Module {} not found", module)
+                println!("Module {} not found", module)
             }
         }
     }
 
+    pub async fn run_command(&self, command: FetchCommand, api: &Combine) {
+        self.run_function(command.module, command.function, command.args, api)
+            .await
+    }
+
     pub fn new_filled() -> ModuleManager {
-        let map: HashMap<String, Box<dyn Module>> = HashMap::from([
-            #[cfg(feature = "display")]
-            ("display",),
-        ]);
+        let mut map: HashMap<String, Box<Module>> = HashMap::new();
+        #[cfg(feature = "display")]
+        map.insert(
+            String::from("display"),
+            Box::new(Module::new(features::display::get_functions())),
+        );
 
         ModuleManager::new(map)
     }
