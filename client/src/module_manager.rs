@@ -26,7 +26,7 @@ impl Module {
 
     pub fn new(functions: HashMap<String, Box<dyn Function>>) -> Module {
         Module {
-            functions: functions,
+            functions,
         }
     }
 }
@@ -37,7 +37,7 @@ pub struct ModuleManager {
 
 impl ModuleManager {
     pub fn new(modules: HashMap<String, Box<Module>>) -> ModuleManager {
-        ModuleManager { modules: modules }
+        ModuleManager { modules }
     }
 
     pub async fn run_function(
@@ -69,6 +69,9 @@ impl ModuleManager {
             String::from("display"),
             Box::new(Module::new(features::display::get_functions())),
         );
+
+        #[cfg(feature = "command")]
+        map.insert(String::from("command"), Box::new(Module::new(features::command::get_functions())));
 
         ModuleManager::new(map)
     }

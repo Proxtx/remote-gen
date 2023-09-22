@@ -76,14 +76,14 @@ impl Screen {
         let screens = screenshots::Screen::all().unwrap();
 
         if screens.len() <= screen_index {
-            return Option::None;
+            return None;
         }
 
         let mut t = 0;
-        let mut screen_option: Option<screenshots::Screen> = Option::None;
+        let mut screen_option: Option<screenshots::Screen> = None;
         for local_screen in screens {
             if t == screen_index {
-                screen_option = Option::Some(local_screen);
+                screen_option = Some(local_screen);
                 break;
             }
 
@@ -94,12 +94,12 @@ impl Screen {
 
         match screen_option {
             Some(local_screen) => screen = local_screen,
-            None => return Option::None,
+            None => return None,
         }
 
         let image = screen.capture().unwrap();
         let buffer = image.buffer();
-        return Option::Some(buffer.to_owned());
+        return Some(buffer.to_owned());
     }
 
     pub fn screens(&self) -> Vec<String> {

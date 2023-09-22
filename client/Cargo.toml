@@ -18,3 +18,4 @@ enigo = {version = "0.1.3", optional = true}
 auto_start=[]
 executable_move=[]
 display=["dep:screenshots", "dep:enigo"]
+command=[]
